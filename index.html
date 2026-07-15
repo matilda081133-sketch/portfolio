@@ -478,6 +478,12 @@
             document.getElementById('currentSlide').innerText = currentIdx + 1;
             document.getElementById('totalSlides').innerText = slides.length;
             document.getElementById('progressFill').style.width = ((currentIdx + 1) / slides.length) * 100 + '%';
+            
+            const prev = document.getElementById('prevBtn');
+            if(prev) { prev.style.opacity = currentIdx === 0 ? '0' : '1'; prev.style.pointerEvents = currentIdx === 0 ? 'none' : 'auto'; }
+            
+            const next = document.getElementById('nextBtn');
+            if(next) { next.style.opacity = currentIdx === slides.length - 1 ? '0' : '1'; next.style.pointerEvents = currentIdx === slides.length - 1 ? 'none' : 'auto'; }
         }
 
         document.getElementById('prevBtn').addEventListener('click', () => {
@@ -527,15 +533,20 @@
                     d.className = i === portIdx ? 'dot active' : 'dot';
                 });
             }
+            const portNextBtn = document.querySelector('.carousel-btn.btn-next');
+            if (portNextBtn) {
+                portNextBtn.style.opacity = portIdx === portSlides.length - 1 ? '0' : '1';
+                portNextBtn.style.pointerEvents = portIdx === portSlides.length - 1 ? 'none' : 'auto';
+            }
         }
 
         function prevPortSlide() {
-            if(portIdx > 0) { portIdx--; } else { portIdx = portSlides.length - 1; }
+            if(portIdx > 0) { portIdx--; }
             updatePortCarousel();
         }
 
         function nextPortSlide() {
-            if(portIdx < portSlides.length - 1) { portIdx++; } else { portIdx = 0; }
+            if(portIdx < portSlides.length - 1) { portIdx++; }
             updatePortCarousel();
         }
     </script>
