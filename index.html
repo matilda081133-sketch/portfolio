@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КП: Неистовый Виссарион</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #f8f9fa;
+            --surface: #ffffff;
+            --text-primary: #121c2d;
+            --text-secondary: #3b4352;
+            --accent-navy: #0f2b46;
+            --gold-accent: #b58d3d;
+            --gold-gradient: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+            --border-light: rgba(15, 43, 70, 0.08);
+            --shadow-soft: 0 10px 40px rgba(15, 43, 70, 0.05);
+            
+            --tag-red: #d32f2f; --tag-red-bg: #ffebee;
+            --tag-green: #2e7d32; --tag-green-bg: #e8f5e9;
+            --tag-gold: #b58d3d; --tag-gold-bg: #fdf8eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 100%; height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ambient-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 10% 10%, rgba(181, 141, 61, 0.04) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 90%, rgba(15, 43, 70, 0.03) 0%, transparent 40%);
+            z-index: 0;
+        }
+
+        .header-bar {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 2rem 4rem;
+            display: flex; justify-content: space-between; z-index: 10;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.25em;
+            text-transform: uppercase; color: var(--text-secondary);
+        }
+
+        .slides-container { position: relative; width: 100%; height: 100%; z-index: 2; }
+
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; overflow-y: auto;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.98) translateY(15px); padding: 5% 8%;
+        }
+
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); }
+
+        h1 {
+            font-family: 'Playfair Display', serif; font-size: 2.3rem; font-weight: 600;
+            margin: 0 0 0.5rem 0; color: var(--accent-navy); width: 100%; max-width: 1400px;
+        }
+        h1 span { color: var(--gold-accent); font-style: italic; font-weight: 400; }
+        
+        .slide-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem; font-weight: 500; color: var(--gold-accent);
+            text-transform: uppercase; letter-spacing: 0.1em;
+            width: 100%; max-width: 1400px; margin-bottom: 2rem;
+            padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);
+        }
+        .slide-subtitle strong { color: var(--accent-navy); }
+
+        .content { width: 100%; max-width: 1400px; margin-bottom: 2rem; }
+
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; width: 100%; }
+        .grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; width: 100%; }
+        .grid-4x2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
+
+        .item {
+            background: var(--surface); padding: 1.5rem; border-radius: 12px;
+            border: 1px solid var(--border-light); border-top: 3px solid var(--accent-navy);
+            box-shadow: var(--shadow-soft); display: flex; flex-direction: column;
+        }
+        .item.step-item { padding: 1.8rem; border-top: none; border-left: 4px solid var(--accent-navy); }
+        .item.gold-left { border-left-color: var(--gold-accent); }
+        .item.red-left { border-left-color: var(--tag-red); }
+
+        .item h3 {
+            font-size: 1.05rem; font-weight: 600; margin: 0 0 1rem 0;
+            color: var(--accent-navy); display: flex; align-items: center; gap: 12px;
+            font-family: 'Montserrat', sans-serif; line-height: 1.4;
+        }
+        .item h3 a { color: var(--accent-navy); text-decoration: none; }
+        .item h3 a:hover { color: var(--gold-accent); }
+
+        .step-num {
+            background: var(--accent-navy); color: white; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-size: 0.9rem; font-weight: 600; flex-shrink: 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .step-num.gold-bg { background: var(--gold-gradient); }
+        .step-num.red-bg { background: var(--tag-red); }
+
+        .item p {
+            font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary);
+            margin-bottom: 0.5rem; font-family: 'Montserrat', sans-serif; font-weight: 400;
+        }
+        .item p strong { color: var(--text-primary); font-weight: 600; }
+
+        .table-container {
+            background: var(--surface); border-radius: 12px; border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft); padding: 2rem; width: 100%;
+        }
+        .media-table { width: 100%; border-collapse: collapse; font-family: 'Montserrat', sans-serif; }
+        .media-table th, .media-table td {
+            text-align: left; padding: 1rem; font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-light); color: var(--text-primary);
+        }
+        .media-table th { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
+        .media-table th:not(:first-child), .media-table td:not(:first-child) { text-align: right; }
+        .total-row td { color: var(--accent-navy); font-weight: 600; border-top: 2px solid var(--accent-navy); }
+
+        .footer-note {
+            margin-top: 1.5rem; background: var(--tag-gold-bg); border: 1px solid rgba(181, 141, 61, 0.2);
+            border-radius: 10px; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 15px;
+        }
+        .footer-icon {
+            background: var(--gold-gradient); width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem; flex-shrink: 0;
+        }
+
+        .controls { position: fixed; bottom: 2rem; right: 4rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-main {
+            background: var(--surface); border: 1px solid var(--border-light); border-radius: 50%;
+            width: 45px; height: 45px; cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center; color: var(--accent-navy); box-shadow: var(--shadow-soft);
+        }
+        .btn-main:hover { border-color: var(--gold-accent); color: var(--gold-accent); transform: translateY(-2px); }
+
+        .slide-indicator {
+            position: fixed; bottom: 3rem; left: 4rem; display: flex; align-items: center; gap: 1.5rem; z-index: 100;
+        }
+        .slide-number { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-style: italic; color: var(--text-secondary); font-weight: 600; }
+        .progress-bar { width: 100px; height: 2px; background: var(--border-light); position: relative; }
+        .progress-fill { position: absolute; height: 100%; background: var(--gold-accent); transition: width 0.3s ease; }
+    
+        /* Carousel Styles */
+        .carousel-container { 
+            position: relative; width: 100%; max-width: 1000px; margin: 0 auto; 
+            background: var(--surface); border-radius: 12px; border: 1px solid var(--border-light); 
+            padding: 2.5rem 4rem; box-shadow: var(--shadow-soft); 
+        }
+        .carousel-slide { display: none; text-align: center; }
+        .carousel-slide.active { display: block; animation: fade 0.4s ease-in-out; }
+        .carousel-slide img, .carousel-slide video { 
+            width: 100%; height: 450px; object-fit: cover; object-position: top;
+            border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 1.5rem; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .carousel-slide h3 { margin-bottom: 0.5rem; font-size: 1.4rem; color: var(--accent-navy); display: block; }
+        .carousel-slide h3 a { color: var(--accent-navy); text-decoration: none; border-bottom: 1px dashed var(--accent-navy); }
+        .carousel-slide h3 a:hover { color: var(--gold-accent); border-color: var(--gold-accent); }
+        .carousel-slide p { color: var(--text-secondary); font-size: 0.95rem; display: block; }
+        .carousel-slide p strong { color: var(--text-primary); font-weight: 600; }
+        
+        .carousel-btn { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: var(--surface); border: 1px solid var(--border-light); 
+            border-radius: 50%; width: 50px; height: 50px; cursor: pointer; 
+            font-size: 1.2rem; display: flex; align-items: center; justify-content: center; 
+            z-index: 10; transition: all 0.2s; box-shadow: var(--shadow-soft); color: var(--accent-navy);
+        }
+        .carousel-btn:hover { border-color: var(--gold-accent); color: var(--gold-accent); background: var(--bg-light); }
+        .btn-prev { left: -25px; }
+        .btn-next { right: -25px; }
+        
+        .carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 1.5rem; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-light); cursor: pointer; transition: 0.3s; }
+        .dot.active { background: var(--gold-accent); transform: scale(1.2); }
+        
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media print {
+            body, html { overflow: visible !important; height: auto !important; background: #fff !important; }
+            .ambient-bg, .controls, .slide-indicator, .carousel-btn, .carousel-dots { display: none !important; }
+            .slides-container { position: static !important; height: auto !important; display: block !important; }
+            .slide { 
+                position: relative !important; opacity: 1 !important; visibility: visible !important; 
+                transform: none !important; page-break-after: always !important; height: 100vh !important;
+                background: #f8f9fa !important; padding: 2rem !important; display: flex !important; margin: 0 !important;
+            }
+            .carousel-slide { display: block !important; margin-bottom: 2rem !important; page-break-inside: avoid !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <svg class="bg-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#d4af37" stop-opacity="0" />
+                    <stop offset="30%" stop-color="#b58d3d" stop-opacity="0.2" />
+                    <stop offset="50%" stop-color="#aa8c2c" stop-opacity="0.4" />
+                    <stop offset="70%" stop-color="#b58d3d" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#d4af37" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+            <path class="bg-line line-1" d="M -10,70 C 30,20 70,120 110,30" stroke="url(#gold-grad)" stroke-width="0.25" fill="none" />
+            <path class="bg-line line-2" d="M -10,30 C 40,90 60,10 110,60" stroke="url(#gold-grad)" stroke-width="0.15" fill="none" />
+            <path class="bg-line line-3" d="M 30,-10 C 10,50 90,50 70,110" stroke="url(#gold-grad)" stroke-width="0.1" fill="none" />
+        </svg>
+    </div>
+    
+    <div class="header-bar">
+        <div>Разработка Цифровой Платформы</div>
+        <div>Неистовый Виссарион</div>
+    </div>
+
+    <div class="slides-container">
+        
+        <!-- Слайд 1: Overview -->
+        <div class="slide active">
+            <h1>Цифровая Платформа: <span>Неистовый Виссарион</span></h1>
+            <div class="slide-subtitle">Архитектурная концепция и техническое решение проекта</div>
+            <div class="content grid-2x2">
+                <div class="item">
+                    <h3><div class="step-num gold-bg">1</div> Видение и Концепция</h3>
+                    <p>Сайт премии «Неистовый Виссарион» федерального масштаба — это не просто информационная визитка. В первую очередь, это <strong>масштабный цифровой исторический архив</strong>, отражающий значимость проекта в культурном пространстве России. Новая платформа должна стать репрезентативным лицом организаторов и безупречным, интуитивно понятным рабочим инструментом как для членов жюри, так и для соискателей премии.</p>
+                </div>
+                <div class="item">
+                    <h3><div class="step-num gold-bg">2</div> Главный Приоритет (по ТЗ)</h3>
+                    <p>Глубоко изучив ваше Техническое задание, мы понимаем, что ключевым вызовом является абсолютная сохранность данных. Наша задача — <strong>безболезненно и без потерь перевезти огромный массив накопленной информации</strong> (начиная с 2019 года) на новую платформу. При этом система управления должна стать настолько простой, чтобы редакция могла вести сайт полностью самостоятельно без IT-специалистов.</p>
+                </div>
+                <div class="item">
+                    <h3><div class="step-num gold-bg">3</div> Архитектура WordPress + CPT</h3>
+                    <p>Мы предлагаем жесткий отказ от использования тяжелых готовых шаблонов, которые замедляют работу. Решение будет спроектировано на базе WordPress с внедрением архитектуры <strong>Custom Post Types (CPT)</strong>. Для каждого типа контента (раздел «Жюри», списки «Лауреатов», архивные «Документы») мы создадим индивидуальные, понятные анкеты. Редактору нужно будет лишь заполнить текстовые поля, а система сама сверстает их в аккуратные списки.</p>
+                </div>
+                <div class="item">
+                    <h3><div class="step-num gold-bg">4</div> Скрипт Миграции и SEO</h3>
+                    <p>Для бесшовного переезда мы напишем специализированный скрипт-парсер. Он в автоматическом режиме извлечет весь исторический контент со старого сайта <strong>book.uraic.ru</strong>, бережно структурируя базу PDF-архивов за 2019–2024 годы. Чтобы проект не потерял накопленный годами поисковый трафик, мы в обязательном порядке настроим корректные 301-редиректы со старых ссылок на новые.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 2: Roadmap -->
+        <div class="slide">
+            <h1>Дорожная Карта <span>Проекта</span></h1>
+            <div class="slide-subtitle">Общий срок реализации «под ключ»: <strong>3.5–4.5 недели</strong> (Ускоренный режим)</div>
+            <div class="content grid-2x2">
+                <div class="item step-item gold-left">
+                    <h3>Спринт 1: Аналитика и UX/UI Дизайн</h3>
+                    <p><strong>Сроки:</strong> 5-7 дней</p>
+                    <p>Проектирование информационной архитектуры для огромного массива данных. Разработка концепции в «литературном» стиле. Утверждение логики глубокого поиска по шорт-листам и документам.</p>
+                </div>
+                <div class="item step-item gold-left">
+                    <h3>Спринт 2: Ядро (WordPress + CPT/ACF)</h3>
+                    <p><strong>Сроки:</strong> 10-14 дней</p>
+                    <p>100% адаптивная верстка. Создание кастомных типов записей (CPT) и анкет (ACF), чтобы ваша редакция могла редактировать контент и добавлять лауреатов простым заполнением текстовых полей, без IT-специалистов.</p>
+                </div>
+                <div class="item step-item gold-left">
+                    <h3>Спринт 3: Скриптинг и Миграция Архива</h3>
+                    <p><strong>Сроки:</strong> 7-10 дней</p>
+                    <p>Написание парсера для бесшовного извлечения контента с <strong>book.uraic.ru</strong> (с 2019 г.). Перенос PDF-документов в централизованное хранилище и настройка 301-редиректов для полного сохранения SEO-трафика.</p>
+                </div>
+                <div class="item step-item gold-left">
+                    <h3>Спринт 4: Безопасность и Обучение</h3>
+                    <p><strong>Сроки:</strong> 3-5 дней</p>
+                    <p>Скрытие панели администратора от взлома, установка невидимой CAPTCHA. Нагрузочное тестирование. Передача проекта и детальное обучение вашей команды комфортной самостоятельной работе с сайтом.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 3: Budget and SLA -->
+        <div class="slide">
+            <h1>Бюджет и <span>SLA-гарантии</span></h1>
+            <div class="slide-subtitle">Оценка инвестиций и технической поддержки</div>
+            <div class="content table-container">
+                <table class="media-table">
+                    <thead>
+                        <tr>
+                            <th>Статья расходов / Услуга</th>
+                            <th>Описание</th>
+                            <th>Сроки</th>
+                            <th>Стоимость</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Проектирование и UX/UI Дизайн</strong></td>
+                            <td>Разработка структуры архива, прототипирование, дизайн главной страницы и навигации</td>
+                            <td>Спринт 1</td>
+                            <td>Включено</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frontend-разработка</strong></td>
+                            <td>Адаптивная верстка, микроанимации, оптимизация скорости загрузки</td>
+                            <td>Спринт 2</td>
+                            <td>Включено</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backend (WordPress + CPT/ACF)</strong></td>
+                            <td>Настройка ядра, создание кастомных типов записей для жюри, лауреатов и архивов</td>
+                            <td>Спринт 2</td>
+                            <td>Включено</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Скрипт парсинга данных</strong></td>
+                            <td>Написание уникального парсера для извлечения данных с book.uraic.ru</td>
+                            <td>Спринт 3</td>
+                            <td>Включено</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Импорт исторических архивов</strong></td>
+                            <td>Перенос новостей, шорт-листов и тысяч PDF-документов с 2019 года</td>
+                            <td>Спринт 3</td>
+                            <td>Включено</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SEO и Безопасность</strong></td>
+                            <td>Настройка сотен 301-редиректов, скрытие админ-панели, защита (CAPTCHA)</td>
+                            <td>Спринт 4</td>
+                            <td>Включено</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Итоговая стоимость проекта:</td>
+                            <td>Разбивается на транши по закрытию Спринтов</td>
+                            <td>3.5-4.5 Недели</td>
+                            <td>180 000 ₽</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="height: 20px; border-bottom: none;"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Гарантийный период</strong></td>
+                            <td>Устранение любых возможных скрытых багов в коде бесплатно</td>
+                            <td>1 месяц</td>
+                            <td><strong>0 ₽</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SLA-Поддержка (Постгарантия)</strong></td>
+                            <td>Мониторинг, бекапы, обновления безопасности, до 10 часов доработок в месяц</td>
+                            <td>Ежемесячно</td>
+                            <td><strong>20 000 ₽ / мес</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="footer-note">
+                    <div class="footer-icon">!</div>
+                    <p><strong>Важно:</strong> Поддержка опциональна. Благодаря Custom Post Types ваша команда сможет вести и обновлять сайт полностью самостоятельно без наших услуг.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 4: Portfolio Carousel -->
+        <div class="slide">
+            <h1>Релевантное <span>Портфолио</span></h1>
+            <div class="slide-subtitle">Примеры UX/UI дизайна и программной архитектуры</div>
+            <div class="content">
+                <div class="carousel-container">
+                    <button class="carousel-btn btn-prev" onclick="prevPortSlide()">◀</button>
+                    
+                    <div class="carousel-slide active">
+                        <video src="./video_lonvibio.mp4" autoplay loop muted playsinline></video>
+                        <h3><a href="https://lonvibio.com.ru/" target="_blank">lonvibio.com.ru</a></h3>
+                        <p><strong>Ниша: Инновационный препарат в области борьбы со старением.</strong> Имиджевый коммерческий проект с упором на эстетику. Разработан современный визуальный язык и выстроена продающая структура контента.</p>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <video src="./video_tex.mp4" autoplay loop muted playsinline></video>
+                        <h3><a href="https://tex-preview.vercel.app/" target="_blank">tex-preview.vercel.app</a></h3>
+                        <p><strong>Ниша: Инновационный IT-стартап / Технологичные решения.</strong> Проект в активной разработке. Демонстрация возможностей современных frontend-решений. Максимальный упор на чистый код, масштабируемую архитектуру и сложную, плавную анимацию интерфейса.</p>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <video src="./video_replan.mp4" autoplay loop muted playsinline></video>
+                        <h3><a href="https://replan-msk.ru/" target="_blank">replan-msk.ru</a></h3>
+                        <p><strong>Ниша: Согласование перепланировок и архитектурное проектирование.</strong> Разработка крупного корпоративного ресурса. Реализована сложная многоуровневая навигация, глубокая детализация услуг и высокая скорость работы.</p>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <video src="./video_fatukhin.mp4" autoplay loop muted playsinline></video>
+                        <h3><a href="https://fatukhin-website.vercel.app/" target="_blank">fatukhin-website.vercel.app</a></h3>
+                        <p><strong>Ниша: Персональный бренд и консалтинг.</strong> Проект развернут на облачной бессерверной платформе Vercel. Отличается мгновенным откликом интерфейса и строгим, статусным визуальным стилем.</p>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <video src="./video_scetszabor.mp4" autoplay loop muted playsinline></video>
+                        <h3><a href="https://scetszabor.lovable.app/" target="_blank">scetszabor.lovable.app</a></h3>
+                        <p><strong>Ниша: Строительство и производство ограждений.</strong> Строгий B2B/B2C портал с понятным функциональным дизайном. Разработана удобная архитектура для демонстрации производственных возможностей компании.</p>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <video src="./video_kwt48.mp4" autoplay loop muted playsinline></video>
+                        <h3><a href="https://kwt48.ru/" target="_blank">kwt48.ru</a></h3>
+                        <p><strong>Ниша: Официальный производитель и разработчик станций РЭБ.</strong> Многостраничный корпоративный портал. Проведена глубокая проработка визуальной иерархии сложного технического контента.</p>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <img src="https://placehold.co/800x450/121c2d/b58d3d?text=premium-moscow-spark" alt="premium-moscow-spark.lovable.app">
+                        <h3><a href="https://premium-moscow-spark.lovable.app/" target="_blank">premium-moscow-spark.lovable.app</a></h3>
+                        <p><strong>Ниша: Маркетинг и автоматизация (Внутренний продукт для команды).</strong> Проект в активной разработке. Интерактивное веб-приложение для систематизации бизнес-процессов. Внедрены микроанимации и бесшовный UX/UI опыт.</p>
+                    </div>
+
+                    <button class="carousel-btn btn-next" onclick="nextPortSlide()">▶</button>
+                    
+                    <div class="carousel-dots" id="portDots"></div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Controls for main slides -->
+    <div class="slide-indicator">
+        <div class="slide-number"><span id="currentSlide">1</span> / <span id="totalSlides">4</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 25%;"></div></div>
+    </div>
+    <div class="controls">
+        <button class="btn-main" id="prevBtn" title="Назад (Стрелка Влево)">◀</button>
+        <button class="btn-main" id="nextBtn" title="Вперед (Стрелка Вправо)">▶</button>
+    </div>
+
+    <script>
+        // Main presentation logic
+        const slides = document.querySelectorAll('.slides-container > .slide');
+        let currentIdx = 0;
+
+        function updateView() {
+            slides.forEach((s, i) => {
+                s.classList.toggle('active', i === currentIdx);
+            });
+            document.getElementById('currentSlide').innerText = currentIdx + 1;
+            document.getElementById('totalSlides').innerText = slides.length;
+            document.getElementById('progressFill').style.width = ((currentIdx + 1) / slides.length) * 100 + '%';
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentIdx > 0) currentIdx--;
+            updateView();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentIdx < slides.length - 1) currentIdx++;
+            updateView();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                if (currentIdx < slides.length - 1) currentIdx++;
+                updateView();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if (currentIdx > 0) currentIdx--;
+                updateView();
+            }
+        });
+        
+        updateView();
+
+        // Portfolio Carousel logic
+        let portIdx = 0;
+        const portSlides = document.querySelectorAll('.carousel-slide');
+        const dotsContainer = document.getElementById('portDots');
+        
+        // Create dots
+        if(dotsContainer && portSlides.length > 0) {
+            portSlides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = i === 0 ? 'dot active' : 'dot';
+                dot.onclick = () => { portIdx = i; updatePortCarousel(); };
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updatePortCarousel() {
+            portSlides.forEach((s, i) => {
+                s.classList.toggle('active', i === portIdx);
+            });
+            const dots = document.querySelectorAll('.dot');
+            if(dots.length > 0) {
+                dots.forEach((d, i) => {
+                    d.className = i === portIdx ? 'dot active' : 'dot';
+                });
+            }
+        }
+
+        function prevPortSlide() {
+            if(portIdx > 0) { portIdx--; } else { portIdx = portSlides.length - 1; }
+            updatePortCarousel();
+        }
+
+        function nextPortSlide() {
+            if(portIdx < portSlides.length - 1) { portIdx++; } else { portIdx = 0; }
+            updatePortCarousel();
+        }
+    </script>
+</body>
+</html>
